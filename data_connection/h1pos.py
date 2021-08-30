@@ -1,3 +1,5 @@
+import sys
+
 from mysql.connector import Error
 
 import mysql.connector
@@ -10,9 +12,12 @@ class db1():
 
     @staticmethod
     def connect():
-        connection = mysql.connector.connect(host='10.2.1.190', database='Hyper1_Retail', password='Hyper1@POS'
+        try:
+         connection = mysql.connector.connect(host='10.2.1.190', database='Hyper1_Retail', password='Hyper1@POS'
                                              , user='pos', port='3306')
-        return connection
+         return connection
+        except:
+            print(sys.exc_info())
 
 
 
