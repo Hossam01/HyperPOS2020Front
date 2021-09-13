@@ -12,11 +12,11 @@ import os
 import sqlite3
 import sys
 from pathlib import Path
-
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QMovie
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
-from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QShortcut
+
 from PyQt5.uic import loadUi
 from mysql.connector import Error
 import time, threading
@@ -88,15 +88,22 @@ class CL_login(QtWidgets.QDialog):
     def FN_ping(self):
         ping = os.system('ping '+self.select_all_tasks()[0][3])
         if ping == 0:
+            filename = '../../assets/internet.gif'
+            self.movie = QMovie(filename)
+            self.label.setMovie(self.movie)
+            self.movie.start()
             return True
         else:
+            filename = '../../assets/noconnection.gif'
+            self.movie = QMovie(filename)
+            self.label.setMovie(self.movie)
+            self.movie.start()
             return False
 
     def foo(self):
         if(self.FN_ping()==False):
             QtWidgets.QMessageBox.warning(self, "Error", "Lose Connection")
-
-        threading.Timer(10, self.foo).start()
+        threading.Timer(60, self.foo).start()
 
     def __init__(self):
         super(CL_login, self).__init__()
