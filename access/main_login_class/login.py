@@ -8,13 +8,18 @@ Created on Mon Jun 29 19:52:06 2020
 @author: emad
 """
 #####
+import os
+import sqlite3
 import sys
 from pathlib import Path
 
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QShortcut
 from PyQt5.uic import loadUi
 from mysql.connector import Error
+import time, threading
 
 from access.authorization_class.user_module import CL_userModule
 # import Controller
@@ -25,18 +30,22 @@ from data_connection.h1pos import db1
 class CL_login(QtWidgets.QDialog):
     switch_window = QtCore.pyqtSignal()
     username=""
+
     def FN_login(self):
         try:
-            if len(self.LE_userName.toPlainText()) > 0 and len(self.LE_password.toPlainText()) > 0:
-                print("Login!")
-                self.username = self.LE_userName.toPlainText()
-                self.password = self.LE_password.toPlainText()
-                self.LE_userName.clear()
-                self.LE_password.clear()
-                self.FN_loadData(self.username, self.password)
+            if(self.FN_ping()):
+                if len(self.Line_UserName.text()) > 0 and len(self.Line_Password.text()) > 0:
+                    print("Login!")
+                    self.username = self.Line_UserName.text()
+                    self.password = self.Line_Password.text()
+                    self.Line_UserName.clear()
+                    self.Line_Password.clear()
+                    self.FN_loadData(self.username, self.password)
 
-            else:
-                QtWidgets.QMessageBox.warning(self, "Error", "Please enter your Username and Password")
+                else:
+                    QtWidgets.QMessageBox.warning(self, "Error", "Please enter your Username and Password")
+
+
         except:
             print(sys.exc_info())
 
@@ -66,6 +75,28 @@ class CL_login(QtWidgets.QDialog):
         except Error as e:
             print("Error reading data from MySQL table", e)
 
+    def select_all_tasks(self):
+        sqliteConnection = sqlite3.connect('../../assets/HyperPosdata.db')
+        cursor = sqliteConnection.cursor()
+        cursor.execute("SELECT * FROM connection")
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+        cursor.close()
+        return rows
+
+    def FN_ping(self):
+        ping = os.system('ping '+self.select_all_tasks()[0][3])
+        if ping == 0:
+            return True
+        else:
+            return False
+
+    def foo(self):
+        if(self.FN_ping()==False):
+            QtWidgets.QMessageBox.warning(self, "Error", "Lose Connection")
+
+        threading.Timer(10, self.foo).start()
 
     def __init__(self):
         super(CL_login, self).__init__()
@@ -76,9 +107,11 @@ class CL_login(QtWidgets.QDialog):
 
         loadUi(filename, self)
         self.setWindowTitle('HyperPOS Login Page')
-        self.LE_userName.setText("admin")
-        self.LE_password.setText("123")
-        self.btn_login.clicked.connect(self.FN_login)
+        self.Line_UserName.setText("admin")
+        self.Line_Password.setText("123")
+        self.BTenter.clicked.connect(self.FN_login)
+        self.BT0.setShortcut("0")
+        self.foo()
 
 class CL_controller():
     def __init__(self):
@@ -94,6 +127,8 @@ class CL_controller():
         self.window = CL_main()
         self.login.close()
         self.window.showMaximized()
+
+
 
 
 def main():
