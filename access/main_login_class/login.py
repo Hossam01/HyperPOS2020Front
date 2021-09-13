@@ -75,10 +75,20 @@ class CL_login(QtWidgets.QDialog):
         except Error as e:
             print("Error reading data from MySQL table", e)
 
-    def select_all_tasks(self):
+    def FNselect_all_tasks(self):
         sqliteConnection = sqlite3.connect('../../assets/HyperPosdata.db')
         cursor = sqliteConnection.cursor()
         cursor.execute("SELECT * FROM connection")
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+        cursor.close()
+        return rows
+
+    def FNselect_pos(self):
+        sqliteConnection = sqlite3.connect('../../assets/HyperPosdata.db')
+        cursor = sqliteConnection.cursor()
+        cursor.execute("SELECT * FROM machine")
         rows = cursor.fetchall()
         for row in rows:
             print(row)
